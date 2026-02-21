@@ -7,6 +7,7 @@
     <title>Admin Dashboard - Smart Gate Pass</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
 </head>
 
 <body onload="initAdmin()">
@@ -212,6 +213,9 @@
         document.getElementById('edit-user-form').onsubmit = async function (e) {
             e.preventDefault();
             const email = document.getElementById('edit-email').value;
+            const user = allUsers.find(u => u.email === email);
+            if (!user) return;
+
             const updatedData = {
                 name: document.getElementById('edit-name').value,
                 dept: document.getElementById('edit-dept').value,
@@ -219,7 +223,7 @@
                 semester: document.getElementById('edit-semester').value,
                 section: document.getElementById('edit-section').value
             };
-            const result = await adminUpdateUser(email, updatedData);
+            const result = await adminUpdateUser(email, user.role, updatedData);
             if (result.success) {
                 alert('Updated successfully');
                 closeEditModal();

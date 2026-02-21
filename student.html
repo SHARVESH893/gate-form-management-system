@@ -7,6 +7,7 @@
     <title>Apply for Leave/OD | Student</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
 </head>
 
 <body onload="initStudent()" class="auth-bg">
@@ -172,8 +173,11 @@
         async function initStudent() {
             checkAuth('student');
             renderAuthNav();
-            await autoFillStudentDetails();
-            await renderStudentRequests();
+
+            // Optimization: Fetch requests once and distribute to components
+            const requests = await getRequests();
+            await autoFillStudentDetails(requests);
+            await renderStudentRequests(requests);
         }
     </script>
 </body>
