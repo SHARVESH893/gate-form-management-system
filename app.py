@@ -16,10 +16,11 @@ app.config['SECRET_KEY'] = 'smart-gate-pass-secure-key-2026-v1-highly-confidenti
 
 # Initialize MongoDB Connection
 try:
-    connect('smart_gate_pass', host='localhost', port=27017, serverSelectionTimeoutMS=2000)
-    print("✓ Successfully connected to MongoDB")
+    ATLAS_URI = "mongodb+srv://cibiraj077_db_user:Cibiraj.001122@cluster0.pe7tmzj.mongodb.net/smart_gate_pass?retryWrites=true&w=majority&appName=Cluster0"
+    connect(host=ATLAS_URI, serverSelectionTimeoutMS=5000)
+    print("✓ Successfully connected to MongoDB Atlas")
 except Exception as e:
-    print("✗ ERROR: Could not connect to MongoDB. Please ensure MongoDB service is running on port 27017.")
+    print("✗ ERROR: Could not connect to MongoDB Atlas.")
     print(f"Details: {e}")
 
 CORS(app)
@@ -49,6 +50,8 @@ def token_required(f):
         try:
             data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
             current_user = User.objects(email=data['email']).first()
+            if not current_user:
+                return jsonify({'message': 'User no longer exists!'}), 401
         except:
             return jsonify({'message': 'Token is invalid!'}), 401
         return f(current_user, *args, **kwargs)
@@ -166,8 +169,8 @@ def manage_requests(current_user):
     # Convert to list of dicts for injection
     request_list = clean_dict(requests)
     
-    # Inject history counts for Student, Staff and HOD
-    if current_user.role in ['student', 'staff', 'hod']:
+    # Inject history counts for Student, Staff, HOD and Warden
+    if current_user.role in ['student', 'staff', 'hod', 'warden']:
         for req in request_list:
             email = req.get('student_email')
             if email:

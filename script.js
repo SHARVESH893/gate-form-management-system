@@ -2,6 +2,7 @@ const BASE_URL = window.location.origin.includes('127.0.0.1') || window.location
 const TOKEN_KEY = 'gate_pass_token';
 const SESSION_KEY = 'gate_pass_session';
 const THEME_KEY = 'gate_pass_theme';
+let isAlertingAuth = false;
 
 // Theme Logic
 function toggleTheme() {
@@ -52,9 +53,11 @@ async function apiRequest(endpoint, method = 'GET', data = null) {
 
         if (response.status === 401) {
             // If it's not the login page, clear session and alert
-            if (!endpoint.includes('/auth/login')) {
+            if (!endpoint.includes('/auth/login') && !isAlertingAuth) {
+                isAlertingAuth = true;
                 logout();
                 alert('Your session has expired. Please login again.');
+                setTimeout(() => isAlertingAuth = false, 2000);
             }
             return { success: false, message: result.message || 'Unauthorized' };
         }
@@ -247,11 +250,12 @@ function switchLoginTab(tab) {
 }
 
 // Render Logic
-async function renderStudentRequests() {
+async function renderStudentRequests(existingRequests = null) {
     const container = document.getElementById('student-requests-container');
     if (!container) return;
 
-    const response = await getRequests();
+    // Use provided requests or fetch new ones
+    const response = existingRequests || await getRequests();
     if (!Array.isArray(response)) return;
 
     if (response.length === 0) {
@@ -437,7 +441,7 @@ function renderAuthNav() {
     }
 }
 
-async function autoFillStudentDetails() {
+async function autoFillStudentDetails(existingRequests = null) {
     const user = getCurrentUser();
     if (!user || user.role !== 'student') return;
 
@@ -447,7 +451,10 @@ async function autoFillStudentDetails() {
     document.getElementById('student-semester').value = user.semester || '';
     document.getElementById('student-section').value = user.section || '';
 
-    const requests = await getRequests();
+    // Use provided requests or fetch new ones
+    const requests = existingRequests || await getRequests();
+    if (!Array.isArray(requests)) return;
+
     const approved = requests.filter(r => r.status === 'Approved');
     document.getElementById('leave-count').innerText = approved.filter(r => r.type === 'Leave').length;
     document.getElementById('od-count').innerText = approved.filter(r => r.type === 'On Duty').length;
@@ -502,6 +509,14 @@ async function adminDeleteUser(email) {
     return await apiRequest(`/admin/users/${email}`, 'DELETE');
 }
 
-async function adminUpdateUser(email, updatedData) {
-    return await apiRequest(`/admin/users/${email}`, 'PUT', updatedData);
+async function adminUpdateUser(email, role, updatedData) {
+    // Only send relevant fields based on role to maintain data integrity
+    const payload = { name: updatedData.name };
+
+    if (role !== 'warden') payload.dept = updatedData.dept;
+    if (['staff', 'warden', 'student'].includes(role)) payload.year = updatedData.year;
+    if (role === 'student') payload.semester = updatedData.semester;
+    if (['staff', 'student'].includes(role)) payload.section = updatedData.section;
+
+    return await apiRequest(`/admin/users/${email}`, 'PUT', payload);
 }
