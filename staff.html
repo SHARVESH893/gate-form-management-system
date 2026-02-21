@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Dashboard | Smart Gate Pass</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body onload="initStaff()" class="auth-bg">
+    <nav>
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <span>Staff Portal</span>
+            </div>
+            <div id="auth-nav"></div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header style="text-align: center; margin-bottom: 4rem;">
+            <h1>Advisor Dashboard</h1>
+            <p id="staff-info" style="color: var(--primary); font-weight: 700; font-size: 1.2rem;"></p>
+        </header>
+
+        <div class="glass-card wide" style="padding: 2.5rem;">
+
+
+            <div id="requests-container">
+                <!-- Requests will be rendered here via JS -->
+            </div>
+        </div>
+
+        <script src="script.js"></script>
+        <script>
+            async function initStaff() {
+                checkAuth('staff');
+                renderAuthNav();
+                await renderRequests('staff');
+            }
+        </script>
+</body>
+
+</html>

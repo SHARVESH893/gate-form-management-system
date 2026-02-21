@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Smart Gate Pass</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body onload="initTheme()" class="auth-bg">
+    <button onclick="toggleTheme()"
+        style="position: fixed; top: 1.5rem; right: 1.5rem; background: var(--bg-card); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); color: var(--text-main); width: 45px; height: 45px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition-smooth); z-index: 1000; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+        <i id="theme-toggle-icon" class="fas fa-sun"></i>
+    </button>
+
+    <div class="glass-card">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <i class="fas fa-shield-alt" style="font-size: 3.5rem; color: var(--primary); margin-bottom: 1rem;"></i>
+            <h1 style="margin: 0; font-size: 2.2rem; font-weight: 800;">Smart Gate Pass Portal</h1>
+            <p style="color: var(--text-muted); font-size: 1rem; margin-top: 0.5rem;">Unified Login Access</p>
+        </div>
+
+        <form onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" name="email" placeholder="sarvesh@gmail.com" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="submit-btn" style="margin-top:1rem">Login to Portal</button>
+        </form>
+        <p style="text-align:center; margin-top:2rem; color:var(--text-muted); font-size:0.9rem">
+            Don't have an account? <a href="register.html"
+                style="color:var(--primary); text-decoration:none; font-weight:600">Register here</a>
+        </p>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>

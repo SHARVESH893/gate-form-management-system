@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Smart Gate Pass</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body onload="initTheme()" class="auth-bg">
+    <button onclick="toggleTheme()"
+        style="position: fixed; top: 1.5rem; right: 1.5rem; background: var(--bg-card); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); color: var(--text-main); width: 45px; height: 45px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition-smooth); z-index: 1000; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+        <i id="theme-toggle-icon" class="fas fa-sun"></i>
+    </button>
+    <div class="glass-card">
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 1rem;">
+            <a href="index.html"
+                style="color:var(--text-muted); text-decoration:none; display:flex; align-items:center; gap:0.5rem; font-weight:600; transition:var(--transition-smooth);">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+            <h2
+                style="font-family: var(--font-heading); background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; font-size: 1.8rem; margin: 0;">
+                Register</h2>
+        </div>
+
+        <form onsubmit="handleRegister(event)">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" name="name" placeholder="SARVESH" required>
+            </div>
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" name="email" placeholder="sarvesh@gmail.com" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="••••••••" required>
+            </div>
+            <div class="form-group">
+                <label>Role</label>
+                <select name="role" id="role-select" required onchange="toggleFields()">
+                    <option value="student">Student</option>
+                    <option value="staff">Staff (Class Advisor)</option>
+                    <option value="warden">Warden</option>
+                    <option value="hod">HOD</option>
+                </select>
+            </div>
+
+            <!-- Student/Warden Specific Fields -->
+            <div id="extra-fields">
+                <div class="form-group" id="dept-group">
+                    <label>Department</label>
+                    <select name="dept" id="dept-select">
+                        <option value="CSE">CSE</option>
+                        <option value="ECE">ECE</option>
+                        <option value="EEE">EEE</option>
+                        <option value="AD">AD</option>
+                        <option value="BME">BME</option>
+                        <option value="IT">IT</option>
+                        <option value="AGRI">AGRI</option>
+                        <option value="MECH">MECH</option>
+                        <option value="CIVIL">CIVIL</option>
+                    </select>
+                </div>
+                <div class="form-group" id="year-group">
+                    <label id="year-label">Year of Warden</label>
+                    <select name="year" id="year-select" onchange="updateSemesters()">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                </div>
+                <div id="sem-sec-fields" style="display:grid; grid-template-columns: 1fr 1fr; gap:0.5rem">
+                    <div id="sem-group">
+                        <label>Semester</label>
+                        <select name="semester" id="semester-select">
+                            <!-- Options filled by script -->
+                        </select>
+                    </div>
+                    <div id="sec-group">
+                        <label>Section</label>
+                        <select name="section">
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="submit-btn" style="margin-top:1rem">Create Account</button>
+        </form>
+        <a href="index.html"
+            style="display: block; width: 100%; padding: 1.2rem; background: #000; color: #fff; text-align: center; text-decoration: none; border-radius: 1.25rem; font-weight: 700; margin-top: 2rem; transition: var(--transition-smooth); box-shadow: 0 10px 20px rgba(0,0,0,0.2);">
+            <i class="fas fa-arrow-left"></i> BACK TO LOGIN
+        </a>
+    </div>
+    <script src="script.js"></script>
+    <script>
+        function updateSemesters() {
+            const year = document.getElementById('year-select').value;
+            const semesterSelect = document.getElementById('semester-select');
+            semesterSelect.innerHTML = '';
+
+            let semesters = [];
+            if (year === '1') semesters = [1, 2];
+            else if (year === '2') semesters = [3, 4];
+            else if (year === '3') semesters = [5, 6];
+            else if (year === '4') semesters = [7, 8];
+
+            semesters.forEach(sem => {
+                const opt = document.createElement('option');
+                opt.value = sem;
+                opt.innerText = sem;
+                semesterSelect.appendChild(opt);
+            });
+        }
+
+        function toggleFields() {
+            const role = document.getElementById('role-select').value;
+            const extraFields = document.getElementById('extra-fields');
+            const deptGroup = document.getElementById('dept-group');
+            const yearGroup = document.getElementById('year-group');
+            const semSecFields = document.getElementById('sem-sec-fields');
+            const semGroup = document.getElementById('sem-group');
+            const secGroup = document.getElementById('sec-group');
+            const yearLabel = document.getElementById('year-label');
+
+            if (role === 'student') {
+                extraFields.style.display = 'block';
+                deptGroup.style.display = 'block';
+                yearGroup.style.display = 'block';
+                semSecFields.style.display = 'grid';
+                semGroup.style.display = 'block';
+                yearLabel.innerText = 'Year';
+                updateSemesters();
+            } else if (role === 'staff') {
+                extraFields.style.display = 'block';
+                deptGroup.style.display = 'block';
+                yearGroup.style.display = 'block';
+                semSecFields.style.display = 'grid';
+                semGroup.style.display = 'none'; // Semester not needed for Staff
+                yearLabel.innerText = 'Advising Year';
+                updateSemesters();
+            } else if (role === 'hod') {
+                extraFields.style.display = 'block';
+                deptGroup.style.display = 'block';
+                yearGroup.style.display = 'none';
+                semSecFields.style.display = 'none';
+            } else if (role === 'warden') {
+                extraFields.style.display = 'block';
+                deptGroup.style.display = 'none';
+                yearGroup.style.display = 'block';
+                semSecFields.style.display = 'none';
+                yearLabel.innerText = 'Year of Warden';
+            } else {
+                extraFields.style.display = 'none';
+            }
+        }
+        // Initialize on load
+        window.onload = toggleFields;
+    </script>
+</body>
+
+</html>

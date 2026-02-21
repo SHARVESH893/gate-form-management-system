@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Smart Gate Pass</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body onload="initAdmin()">
+    <nav>
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-shield-halved"></i>
+                <span>Admin Panel</span>
+            </div>
+            <div id="auth-nav"></div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <header style="margin-bottom: 2rem;">
+            <h1>Account Management</h1>
+            <p style="color: var(--text-muted)">Manage Student, Staff, and HOD accounts to ensure system integrity.</p>
+        </header>
+
+        <!-- Tab Navigation -->
+        <div class="tabs"
+            style="display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 0.5rem;">
+            <button class="tab-btn active" onclick="switchTab('staff')" id="btn-staff">Staff</button>
+            <button class="tab-btn" onclick="switchTab('hod')" id="btn-hod">HOD</button>
+            <button class="tab-btn" onclick="switchTab('warden')" id="btn-warden">Warden</button>
+            <button class="tab-btn" onclick="switchTab('student')" id="btn-student">Student</button>
+        </div>
+
+        <div class="glass-card wide" style="padding: 0; overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; min-width: 900px;">
+                <thead style="background: var(--glass-highlight);">
+                    <tr>
+                        <th style="padding: 1.25rem 1.5rem; color: var(--primary);">Name</th>
+                        <th style="padding: 1.25rem 1.5rem; color: var(--primary);">Role</th>
+                        <th style="padding: 1.25rem 1.5rem; color: var(--primary);" id="header-dept">Department</th>
+                        <th style="padding: 1.25rem 1.5rem; color: var(--primary);" id="header-scope">Scope (Year/Sec)
+                        </th>
+                        <th style="padding: 1.25rem 1.5rem; color: var(--primary); text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-user-table-body">
+                    <!-- Users will be rendered here -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Edit Modal -->
+    <div id="edit-modal" class="modal"
+        style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter:blur(5px); overflow-y:auto; padding: 2rem 0;">
+        <div class="glass-card" style="max-width:500px; margin: 2rem auto; padding: 2rem;">
+            <h2 style="margin-bottom:1.5rem; color:var(--primary)">Edit Account Details</h2>
+            <form id="edit-user-form">
+                <input type="hidden" id="edit-email">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="edit-name" required>
+                </div>
+                <div id="role-specific-fields">
+                    <div class="form-group" id="dept-field">
+                        <label>Department</label>
+                        <select id="edit-dept">
+                            <option value="CSE">CSE</option>
+                            <option value="ECE">ECE</option>
+                            <option value="EEE">EEE</option>
+                            <option value="AD">AD</option>
+                            <option value="BME">BME</option>
+                            <option value="IT">IT</option>
+                            <option value="AGRI">AGRI</option>
+                            <option value="MECH">MECH</option>
+                            <option value="CIVIL">CIVIL</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="year-field">
+                        <label>Year</label>
+                        <select id="edit-year">
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="semester-field">
+                        <label>Semester</label>
+                        <select id="edit-semester">
+                            <option value="1">Sem 1</option>
+                            <option value="2">Sem 2</option>
+                            <option value="3">Sem 3</option>
+                            <option value="4">Sem 4</option>
+                            <option value="5">Sem 5</option>
+                            <option value="6">Sem 6</option>
+                            <option value="7">Sem 7</option>
+                            <option value="8">Sem 8</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="section-field">
+                        <label>Section</label>
+                        <select id="edit-section">
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display:flex; gap:1rem; margin-top:2rem">
+                    <button type="submit" class="submit-btn">Save Changes</button>
+                    <button type="button" class="submit-btn"
+                        style="background:var(--glass-highlight); color:var(--text-main)"
+                        onclick="closeEditModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let currentTab = 'staff';
+        let allUsers = [];
+
+        async function initAdmin() {
+            checkAuth('admin');
+            renderAuthNav();
+            await refreshAdminData();
+        }
+
+        async function refreshAdminData() {
+            allUsers = await adminGetManagedUsers();
+            renderAdminDashboard();
+        }
+
+        function switchTab(role) {
+            currentTab = role;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`btn-${role}`).classList.add('active');
+            renderAdminDashboard();
+        }
+
+        function renderAdminDashboard() {
+            const body = document.getElementById('admin-user-table-body');
+
+            if (!Array.isArray(allUsers)) {
+                body.innerHTML = `<tr><td colspan="5" style="padding: 2rem; text-align: center; color: var(--error);">Error: Could not load user data. ${allUsers.message || ''}</td></tr>`;
+                return;
+            }
+
+            const users = allUsers.filter(u => u.role === currentTab);
+
+            if (users.length === 0) {
+                body.innerHTML = `<tr><td colspan="5" style="padding: 2rem; text-align: center; color: var(--text-muted);">No ${currentTab} accounts found.</td></tr>`;
+                return;
+            }
+
+            body.innerHTML = users.map(u => {
+                let scope = '-';
+                if (u.role === 'staff') scope = `Year ${u.year} / Sec ${u.section}`;
+                else if (u.role === 'warden') scope = `Year ${u.year}`;
+                else if (u.role === 'student') scope = `${u.year} / Sem ${u.semester} / Sec ${u.section}`;
+
+                return `
+                <tr style="border-top: 1px solid var(--glass-border);">
+                    <td style="padding: 1.25rem 1.5rem;">
+                        <div style="font-weight: 600;">${u.name}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">${u.email}</div>
+                    </td>
+                    <td style="padding: 1.25rem 1.5rem;"><span class="status-badge status-approved">${u.role.toUpperCase()}</span></td>
+                    <td style="padding: 1.25rem 1.5rem;">${u.dept || '-'}</td>
+                    <td style="padding: 1.25rem 1.5rem;">${scope}</td>
+                    <td style="padding: 1.25rem 1.5rem; text-align: right;">
+                        <button onclick="openEditModal('${u.email}')" style="background: var(--primary); border: none; color: white; padding: 0.4rem 0.8rem; border-radius: 0.5rem; cursor: pointer; margin-right: 0.5rem;"><i class="fas fa-edit"></i></button>
+                        <button onclick="handleDelete('${u.email}')" style="background: var(--accent); border: none; color: white; padding: 0.4rem 0.8rem; border-radius: 0.5rem; cursor: pointer;"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        function openEditModal(email) {
+            const user = allUsers.find(u => u.email === email);
+            if (!user) return;
+
+            document.getElementById('edit-email').value = user.email;
+            document.getElementById('edit-name').value = user.name;
+            document.getElementById('edit-dept').value = user.dept || '';
+            document.getElementById('edit-year').value = user.year || '';
+            document.getElementById('edit-semester').value = user.semester || '';
+            document.getElementById('edit-section').value = user.section || '';
+
+            document.getElementById('dept-field').style.display = (user.role !== 'warden') ? 'block' : 'none';
+            document.getElementById('year-field').style.display = (['staff', 'warden', 'student'].includes(user.role)) ? 'block' : 'none';
+            document.getElementById('semester-field').style.display = (user.role === 'student') ? 'block' : 'none';
+            document.getElementById('section-field').style.display = (['staff', 'student'].includes(user.role)) ? 'block' : 'none';
+
+            document.getElementById('edit-modal').style.display = 'block';
+        }
+
+        function closeEditModal() { document.getElementById('edit-modal').style.display = 'none'; }
+
+        async function handleDelete(email) {
+            if (confirm(`Delete account for ${email}?`)) {
+                const result = await adminDeleteUser(email);
+                if (result.success) await refreshAdminData();
+            }
+        }
+
+        document.getElementById('edit-user-form').onsubmit = async function (e) {
+            e.preventDefault();
+            const email = document.getElementById('edit-email').value;
+            const updatedData = {
+                name: document.getElementById('edit-name').value,
+                dept: document.getElementById('edit-dept').value,
+                year: document.getElementById('edit-year').value,
+                semester: document.getElementById('edit-semester').value,
+                section: document.getElementById('edit-section').value
+            };
+            const result = await adminUpdateUser(email, updatedData);
+            if (result.success) {
+                alert('Updated successfully');
+                closeEditModal();
+                await refreshAdminData();
+            }
+        };
+    </script>
+</body>
+
+</html>

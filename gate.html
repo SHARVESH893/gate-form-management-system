@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gate Security | Smart Gate Pass</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+
+<body onload="initGate()" class="auth-bg">
+    <nav>
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-shield-alt"></i>
+                <span>GATE SECURITY</span>
+            </div>
+            <div id="auth-nav">
+                <a href="index.html" class="tab-btn"
+                    style="text-decoration:none; display:flex; align-items:center; gap:0.5rem">
+                    <i class="fas fa-home"></i> Home
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="glass-card wide" style="margin-bottom: 2rem;">
+            <h1>Gate Exit Control</h1>
+            <p style="text-align:center; color: var(--text-muted); margin-bottom: 2rem;">Scan the student's approved
+                gate pass QR code to record outgoing details.</p>
+
+            <div id="reader-container"
+                style="max-width: 500px; margin: 0 auto; overflow: hidden; border-radius: 1.5rem; border: 2px solid var(--primary); background: var(--bg-dark);">
+                <div id="reader"></div>
+            </div>
+
+            <div id="scan-result" style="margin-top: 2rem; display: none;">
+                <div class="request-card" style="border-color: var(--success); background: rgba(16, 185, 129, 0.05);">
+                    <div style="text-align:center; margin-bottom: 1rem;">
+                        <i class="fas fa-check-circle" style="font-size: 3rem; color: var(--success);"></i>
+                        <h2 style="color: var(--success); margin-top: 0.5rem;">STUDENT VERIFIED & RECORDED</h2>
+                    </div>
+                    <div id="student-details-preview"
+                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 1.1rem;">
+                        <!-- Details will be injected here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card wide">
+            <div
+                style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 1rem;">
+                <h2 style="color: var(--primary); margin: 0;">Outgoing History</h2>
+                <div style="display:flex; gap:0.75rem;">
+                    <button onclick="downloadGateHistoryCSV()" class="submit-btn"
+                        style="padding: 0.5rem 1rem; font-size: 0.75rem; background: var(--primary); margin:0;">
+                        <i class="fas fa-download"></i> CSV
+                    </button>
+                    <button onclick="clearGateHistory()" class="reject-btn"
+                        style="padding: 0.5rem 1rem; font-size: 0.75rem; margin:0;">
+                        <i class="fas fa-trash"></i> Clear
+                    </button>
+                </div>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Department</th>
+                            <th>Year / Semester</th>
+                            <th>Outing Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gate-history-table">
+                        <!-- History rows will be injected here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        const html5QrCode = new Html5Qrcode("reader");
+        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+        async function onScanSuccess(decodedText, decodedResult) {
+            try {
+                // Handle new pipe-separated format
+                const parts = decodedText.split('|');
+                let data = {};
+
+                if (parts.length >= 7) {
+                    // Format: PASS|id|name|dept|year_sem_sec|type|exp
+                    data = {
+                        id: parts[1],
+                        name: parts[2],
+                        dept: parts[3],
+                        year_sem_sec: parts[4],
+                        type: parts[5],
+                        expiry: parts[6]
+                    };
+                } else if (parts.length === 6) {
+                    // Legacy Format: PASS|id|name|dept|type|exp
+                    data = {
+                        id: parts[1],
+                        name: parts[2],
+                        dept: parts[3],
+                        year_sem_sec: 'N/A (Reprint Pass)',
+                        type: parts[4],
+                        expiry: parts[5]
+                    };
+                } else {
+                    throw new Error("Invalid format");
+                }
+
+                data.outing_time = new Date().toLocaleString();
+                const result = await recordGateEntry(data);
+
+                if (result.success) {
+                    showScanResult(result.record || data); // Use server-verified data if available
+                    await renderGateHistory();
+                    html5QrCode.pause();
+                    setTimeout(() => {
+                        document.getElementById('scan-result').style.display = 'none';
+                        html5QrCode.resume();
+                    }, 5000);
+                }
+            } catch (e) {
+                console.error("Invalid QR code format", e);
+                alert("Invalid Gate Pass QR Code");
+            }
+        }
+
+        function onScanFailure(error) { /* Ignored */ }
+
+        async function initGate() {
+            checkAuth('gate');
+            renderAuthNav();
+            initTheme();
+            await renderGateHistory();
+            html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure);
+        }
+
+        function showScanResult(record) {
+            const preview = document.getElementById('student-details-preview');
+            const container = document.getElementById('scan-result');
+
+            preview.innerHTML = `
+                <div><strong>Name:</strong> ${record.name}</div>
+                <div><strong>Dept:</strong> ${record.dept}</div>
+                <div><strong>Year/Sec:</strong> ${record.year_sem_sec}</div>
+                <div><strong>Time:</strong> ${record.outing_time}</div>
+            `;
+            container.style.display = 'block';
+            container.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function renderGateHistory() {
+            const history = await getGateHistory();
+            const tableBody = document.getElementById('gate-history-table');
+
+            if (!Array.isArray(history) || history.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted)">No outgoing records found.</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = history.map(row => `
+                <tr>
+                    <td>${row.name}</td>
+                    <td>${row.dept}</td>
+                    <td>${row.year_sem_sec}</td>
+                    <td>${row.outing_time}</td>
+                </tr>
+            `).join('');
+        }
+    </script>
+</body>
+
+</html>

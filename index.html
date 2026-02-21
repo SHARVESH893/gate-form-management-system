@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Smart Gate Pass</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body onload="checkAuth(); initTheme()" class="auth-bg">
+    <button onclick="toggleTheme()"
+        style="position: fixed; top: 1.5rem; right: 1.5rem; background: var(--bg-card); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); color: var(--text-main); width: 45px; height: 45px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition-smooth); z-index: 1000; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+        <i id="theme-toggle-icon" class="fas fa-sun"></i>
+    </button>
+    <div class="glass-card" style="max-width: 550px; margin: 4rem auto; padding: 2.5rem;">
+        <div style="text-align: center; margin-bottom: 2.5rem;">
+            <div style="position: relative; width: 80px; height: 80px; margin: 0 auto 1.5rem;">
+                <div
+                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: 1.5rem; transform: rotate(15deg); box-shadow: 0 15px 30px var(--primary-glow);">
+                </div>
+                <div
+                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; z-index: 1;">
+                    <i class="fas fa-shield-alt" style="font-size: 2.5rem; color: white;"></i>
+                </div>
+            </div>
+            <h1 style="margin: 0; font-size: 2.2rem; font-weight: 800; line-height: 1.2;">Smart Gate Pass Portal</h1>
+            <p
+                style="color: var(--secondary); font-weight: 700; font-size: 0.8rem; letter-spacing: 3px; text-transform: uppercase; margin-top: 0.5rem;">
+                Kongunadu Engineering
+            </p>
+        </div>
+
+        <div
+            style="display: flex; gap: 0.5rem; background: var(--bg-input); padding: 0.4rem; border-radius: 1.2rem; margin-bottom: 2rem; border: 1px solid var(--glass-border);">
+            <button onclick="switchLoginTab('portal')" class="tab-btn active" data-portal="portal"
+                style="flex: 1; padding: 0.8rem; border-radius: 0.8rem; font-size: 0.85rem; letter-spacing: 1px;">PORTAL</button>
+            <button onclick="switchLoginTab('gate')" class="tab-btn" data-portal="gate"
+                style="flex: 1; padding: 0.8rem; border-radius: 0.8rem; font-size: 0.85rem; letter-spacing: 1px;">SECURITY</button>
+            <button onclick="switchLoginTab('admin')" class="tab-btn" data-portal="admin"
+                style="flex: 1; padding: 0.8rem; border-radius: 0.8rem; font-size: 0.85rem; letter-spacing: 1px;">ADMIN</button>
+        </div>
+
+        <p id="login-desc" style="text-align:center; color: var(--text-muted); margin-bottom: 2rem; font-size: 0.9rem;">
+            Please enter your credentials to access your portal.
+        </p>
+
+        <form onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" name="email" placeholder="sarvesh@gmail.com" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="submit-btn" style="margin-top:1rem; padding: 1.2rem;">Login to Portal</button>
+        </form>
+
+        <p style="text-align:center; margin-top:1.5rem; color:var(--text-muted); font-size:0.9rem">
+            New user? <a href="register.html"
+                style="color:var(--primary); text-decoration:none; font-weight:600;">Register Account</a>
+        </p>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>

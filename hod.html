@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOD Dashboard | Smart Gate Pass</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body onload="initHOD()" class="auth-bg">
+    <nav>
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-user-shield"></i>
+                <span>HOD Portal</span>
+            </div>
+            <div id="auth-nav"></div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header style="text-align: center; margin-bottom: 4rem;">
+            <h1>HOD Dashboard</h1>
+            <p id="hod-info" style="color: var(--primary); font-weight: 700; font-size: 1.2rem;"></p>
+            <p style="color: var(--text-muted);">Department Oversight & Approval</p>
+        </header>
+
+        <div class="glass-card wide" style="padding: 2.5rem;">
+
+
+            <div id="requests-container">
+                <!-- Requests will be rendered here via JS -->
+            </div>
+        </div>
+
+        <script src="script.js"></script>
+        <script>
+            async function initHOD() {
+                checkAuth('hod');
+                renderAuthNav();
+                await renderRequests('hod');
+            }
+        </script>
+</body>
+
+</html>

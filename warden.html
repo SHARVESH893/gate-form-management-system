@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warden Dashboard | Smart Gate Pass</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body onload="initWarden()" class="auth-bg">
+    <nav>
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-hotel"></i>
+                <span>Warden Portal</span>
+            </div>
+            <div id="auth-nav"></div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header
+            style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 4rem; flex-wrap: wrap; gap: 2rem;">
+            <div>
+                <h1 style="margin-bottom: 0.5rem; font-size: 3.5rem; text-align: left;">Warden Dashboard</h1>
+                <p style="color: var(--text-muted);">Hostel Exit Management</p>
+            </div>
+            <div id="year-filter-info"
+                style="font-size: 1.1rem; background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; padding: 1rem 2rem; border-radius: 1.5rem; font-weight: 800; box-shadow: 0 10px 20px var(--primary-glow);">
+                <!-- Filled by script -->
+            </div>
+        </header>
+
+        <div class="glass-card wide" style="padding: 2.5rem;">
+
+
+            <div id="requests-container">
+                <!-- Requests will be rendered here -->
+                <div class="loading-spinner"></div>
+            </div>
+        </div>
+
+        <script src="script.js"></script>
+        <script>
+            async function initWarden() {
+                checkAuth('warden');
+                renderAuthNav();
+                await renderRequests('warden');
+
+                const user = getCurrentUser();
+                if (user && user.role === 'warden') {
+                    document.getElementById('year-filter-info').innerText = `Year ${user.year} Warden`;
+                }
+            }
+        </script>
+</body>
+
+</html>

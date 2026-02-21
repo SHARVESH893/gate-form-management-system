@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply for Leave/OD | Student</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body onload="initStudent()" class="auth-bg">
+    <nav>
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-shield-alt"></i>
+                <span>Student Portal</span>
+            </div>
+            <div id="auth-nav"></div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header style="text-align: center; margin-bottom: 4rem;">
+            <h1>Apply for Leave/OD</h1>
+            <p style="color: var(--text-muted); font-size: 1.1rem;">Digital Leave & OD Permission System</p>
+        </header>
+
+        <div class="glass-card" style="margin-bottom: 3rem;">
+
+
+            <form id="student-form" onsubmit="handleStudentSubmit(event)">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="student-name" name="name" placeholder="Enter your full name" required
+                        readonly>
+                </div>
+
+                <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:0.5rem">
+                    <div>
+                        <label>Year</label>
+                        <select id="student-year" name="year" required disabled>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Semester</label>
+                        <select id="student-semester" name="semester" required disabled>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Section</label>
+                        <select id="student-section" name="section" required disabled>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Department</label>
+                    <input type="text" id="student-dept" name="dept" placeholder="e.g. CSE" required readonly>
+                </div>
+
+                <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem">
+                    <div>
+                        <label>From Date</label>
+                        <input type="date" name="from_date" id="from-date" required onchange="calculateDays()">
+                    </div>
+                    <div>
+                        <label>To Date</label>
+                        <input type="date" name="to_date" id="to-date" required onchange="calculateDays()">
+                    </div>
+                </div>
+
+                <div id="days-display"
+                    style="text-align: center; margin-bottom: 1.5rem; font-weight: 600; color: var(--primary); display: none;">
+                    Total Duration: <span id="calculated-days">0</span> Day(s)
+                </div>
+
+                <script>
+                    function calculateDays() {
+                        const from = document.getElementById('from-date').value;
+                        const to = document.getElementById('to-date').value;
+                        const display = document.getElementById('days-display');
+                        const span = document.getElementById('calculated-days');
+
+                        if (from && to) {
+                            const startDate = new Date(from);
+                            const endDate = new Date(to);
+                            const diffTime = Math.abs(endDate - startDate);
+                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+                            if (endDate >= startDate) {
+                                display.style.display = 'block';
+                                span.innerText = diffDays;
+                            } else {
+                                display.style.display = 'none';
+                            }
+                        } else {
+                            display.style.display = 'none';
+                        }
+                    }
+                </script>
+
+                <div class="form-group">
+                    <label>Type</label>
+                    <select name="type" required>
+                        <option value="Leave">Leave</option>
+                        <option value="On Duty">On Duty</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Student Category</label>
+                    <select name="resident_type" required>
+                        <option value="Day Scholar">Day Scholar</option>
+                        <option value="Hosteller">Hosteller</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Reason for Leave/OD</label>
+                    <textarea name="reason" rows="3" placeholder="Describe your reason..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Upload Supporting Document (Optional)</label>
+                    <div style="position: relative; overflow: hidden;">
+                        <input type="file" name="document" accept="image/*"
+                            style="padding: 1rem; background: var(--bg-input); border: 2px dashed var(--glass-border); border-radius: 1.25rem; width: 100%; color: var(--text-muted); cursor: pointer; transition: var(--transition-premium);">
+                    </div>
+                </div>
+
+                <div class="form-group"
+                    style="padding: 1rem; background: var(--glass-highlight); border: 1px solid var(--glass-border); border-radius: 1rem; display: flex; justify-content: space-around; align-items: center; margin-bottom: 2rem;">
+                    <div style="text-align: center;">
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.25rem;">Leaves Approved
+                        </p>
+                        <span id="leave-count"
+                            style="font-size: 1.5rem; font-weight: 800; color: var(--secondary);">0</span>
+                    </div>
+                    <div style="width: 1px; height: 30px; background: var(--glass-border);"></div>
+                    <div style="text-align: center;">
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.25rem;">OD Approved</p>
+                        <span id="od-count" style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">0</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" style="margin-top:1rem">Submit Permission Request</button>
+            </form>
+
+            <div id="student-requests-container">
+                <!-- Personalized requests will be rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        async function initStudent() {
+            checkAuth('student');
+            renderAuthNav();
+            await autoFillStudentDetails();
+            await renderStudentRequests();
+        }
+    </script>
+</body>
+
+</html>
